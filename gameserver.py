@@ -2,9 +2,6 @@ import SocketServer
 
 class MyTCPHandler(SocketServer.StreamRequestHandler):
 
-    def setup():
-        pass
-        
     def handle(self):
         # self.rfile is a file-like object created by the handler;
         # we can now use e.g. readline() instead of raw recv() calls
@@ -15,13 +12,11 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         # to the client
         self.wfile.write(self.data.upper())
         
-    def finish():
-        pass
-        
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
 
     # Create the server, binding to localhost on port 9999
+    SocketServer.TCPServer.allow_reuse_address = True
     server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
 
     # Activate the server; this will keep running until you
