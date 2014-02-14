@@ -1,16 +1,19 @@
 import SocketServer
 import uuid
+import time
 from player import BasePlayer
 from clientrequest import ClientRequest
 
 class MyTCPHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
-        #~ self.data = self.rfile.readline().strip()
-        self.data = self.request.recv(1024).strip()
-        
-        #~ self.wfile.write(self.data.upper())
-        self.request.sendall(self.data.upper())
+        """The request handler"""
+        while True:
+            self.data = self.request.recv(1024).strip()
+            print "Received:    {}".format(self.data)
+            self.request.sendall(self.data.upper())
+            print "Sent:        {}".format(self.data.upper())
+            time.sleep(1)
         
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
