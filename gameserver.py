@@ -1,4 +1,5 @@
 import SocketServer
+import socket
 import time
 import threading
 from player import BasePlayer
@@ -8,13 +9,24 @@ class ThreadedTCPRequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
         """The request handler"""
+        queue = []
+        
         while True:
-            self.data = self.request.recv(1024)
-            if self.data:
-                cur_thread = threading.current_thread()
-                response = "{}: {}".format(cur_thread.name, self.data)
-                self.request.sendall(response)
+            if not queue:
+                queue.append(self.request.recv(1024))
+            
+            if len(queue[0]) == 0:
+                break
 
+            self.data = queue.pop(0)
+            cur_thread = threading.current_thread()
+            response = "{}: {}".format(cur_thread.name, self.data)
+            self.request.sendall(response)
+            
+        # If we got here, the connection was closed.
+        print 'Connection closed.'
+        self.request.close()
+            
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
