@@ -1,8 +1,8 @@
 import socket
 import sys
 import uuid
-import json
-    
+import time
+
 class GameClient:
     """example client"""
     
@@ -49,8 +49,5 @@ if __name__ == "__main__":
     request = client.generate_request()
     client.connect()
     client.send_request(request)
-    client.send_request(request)
-    client.send_request(request)
-    client.send_request(request)
-    
-        
+    time.sleep(2)
+    client.send_request(request)    

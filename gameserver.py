@@ -1,29 +1,34 @@
 import SocketServer
-import uuid
 import time
+import threading
 from player import BasePlayer
 from clientrequest import ClientRequest
 
-class MyTCPHandler(SocketServer.StreamRequestHandler):
+class ThreadedTCPRequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
         """The request handler"""
         while True:
-            self.data = self.request.recv(1024).strip()
-            print "Received:    {}".format(self.data)
-            self.request.sendall(self.data.upper())
-            print "Sent:        {}".format(self.data.upper())
-            time.sleep(1)
-        
+            self.data = self.request.recv(1024)
+            if self.data:
+                cur_thread = threading.current_thread()
+                response = "{}: {}".format(cur_thread.name, self.data)
+                self.request.sendall(response)
+            #~ time.sleep(1)    
+
+class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+    pass
+
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
-    a = 0
-    # Create the server, binding to localhost on port 9999
-    SocketServer.TCPServer.allow_reuse_address = True
-    server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
+    server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+    ip, port = server.server_address
 
-    player_list =  []
-
-    # Activate the server; this will keep running until you
-    # interrupt the program with Ctrl-C
-    server.serve_forever()
+    # Start a thread with the server -- that thread will then start one
+    # more thread for each request
+    server_thread = threading.Thread(target=server.serve_forever())
+    # Exit the server thread when the main thread terminates
+    server_thread.daemon = True
+    server_thread.start()
+    print "Server loop running in thread:", server_thread.name
+    
