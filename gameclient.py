@@ -43,11 +43,19 @@ class GameClient:
         """generate a request"""
         return str(self.client_id)
         #~ return str({"uuid", self.client_id})
+        
+    def close(self):
+        self.sock.close()
 
 if __name__ == "__main__":
     client = GameClient()
-    request = client.generate_request()
+    #~ request = client.generate_request()
     client.connect()
-    client.send_request(request)
-    time.sleep(2)
-    client.send_request(request)    
+    #~ client.send_request(request)
+    #~ time.sleep(2)
+    #~ client.send_request(request)
+    request = raw_input("> ")
+    while request.lower() not in ["exit", "quit"]:
+        client.send_request(request)
+        request = raw_input("> ")
+    client.close()
